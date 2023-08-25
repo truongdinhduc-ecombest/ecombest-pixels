@@ -1,0 +1,75 @@
+"use client";
+
+import useCanvas from "@/canvas/useCanvas";
+import {
+  addCanvasSettings,
+  centerCanvasViewPort,
+  removeCanvasSettings,
+  setCanvasViewport,
+} from "@/canvas/utils";
+import { useEffect, useRef, useState } from "react";
+
+interface Props {
+  canvasId: string;
+}
+
+export default function Canvas(props: Props) {
+  const { canvasId } = props;
+  const canvasContainer = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+  const { canvas } = useCanvas(canvasId, {
+    width: 1000,
+    height: 1000,
+    backgroundColor: "white",
+  });
+
+  useEffect(() => {
+    if (canvas) {
+      setCanvasViewport(canvas, { width: 500, height: 500 });
+      var settings = addCanvasSettings(canvas);
+    }
+    return () => {
+      canvas && removeCanvasSettings(canvas, settings);
+    };
+  }, [canvas]);
+
+  useEffect(() => {
+    const resizeCanvas = () => {
+      canvasContainer.current &&
+        setDimensions({
+          width: canvasContainer.current.offsetWidth,
+          height: canvasContainer.current.offsetHeight,
+        });
+    };
+
+    resizeCanvas();
+    if (canvas && canvasContainer.current) {
+      setDimensions({
+        width: canvasContainer.current.offsetWidth,
+        height: canvasContainer.current.offsetHeight,
+      });
+      window.addEventListener("resize", resizeCanvas);
+    }
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+    };
+  }, [canvas, canvasContainer]);
+
+  useEffect(() => {
+    if (canvas) {
+      canvas.setDimensions(dimensions);
+      centerCanvasViewPort(canvas);
+    }
+  }, [dimensions, canvas]);
+
+  return (
+    <div
+      ref={canvasContainer}
+      className="w-full h-full flex justify-center items-center overflow-hidden"
+    >
+      <canvas id={canvasId}></canvas>
+    </div>
+  );
+}
