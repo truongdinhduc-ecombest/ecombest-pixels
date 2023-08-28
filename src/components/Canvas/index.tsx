@@ -10,29 +10,14 @@ import {
 import { useEffect, useRef, useState } from "react";
 
 interface Props {
+  canvas?: fabric.Canvas;
   canvasId: string;
 }
 
 export default function Canvas(props: Props) {
-  const { canvasId } = props;
+  const { canvas, canvasId } = props;
   const canvasContainer = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-
-  const { canvas } = useCanvas(canvasId, {
-    width: 1000,
-    height: 1000,
-    backgroundColor: "white",
-  });
-
-  useEffect(() => {
-    if (canvas) {
-      setCanvasViewport(canvas, { width: 500, height: 500 });
-      var settings = addCanvasSettings(canvas);
-    }
-    return () => {
-      canvas && removeCanvasSettings(canvas, settings);
-    };
-  }, [canvas]);
 
   useEffect(() => {
     const resizeCanvas = () => {

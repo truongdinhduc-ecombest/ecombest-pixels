@@ -1,7 +1,7 @@
 import { CANVAS_ATTRIBUTES, KEY_CODES } from "@/canvas/constants";
 import { IEvent } from "fabric/fabric-impl";
 import { fabric } from "fabric";
-import { getPixel } from "@/pixel/utils";
+import { IPixelOptions, IPixelSettings } from "./interfaces";
 
 export const setCanvasViewport = (
   canvas: fabric.Canvas,
@@ -110,7 +110,10 @@ export const removeCanvasKeyboardSettings = (
   });
 };
 
-export const addCanvasSettings = (canvas: fabric.Canvas) => {
+export const addCanvasSettings = (
+  canvas: fabric.Canvas,
+  pixelSettings: IPixelSettings
+) => {
   const mouseWheelSettings = (event: IEvent<WheelEvent>) => {
     event.e.preventDefault();
     event.e.stopPropagation();
@@ -137,48 +140,61 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
     // panning mode
     let previousX = 0;
     let previousY = 0;
-    const startPanning = (event: IEvent<MouseEvent>) => {
-      if ((canvas as any).isPanningMode) {
-        previousX = event.e.clientX;
-        previousY = event.e.clientY;
-        canvas.on("mouse:move", onPanning);
-        canvas.on("mouse:up", onEndPanning);
-      }
+    const onStartPanning = (event: IEvent<MouseEvent>) => {
+      previousX = event.e.clientX;
+      previousY = event.e.clientY;
+      canvas.on("mouse:move", onPanning);
+      canvas.on("mouse:up", onEndPanning);
     };
-    const onPanning = (event: IEvent<MouseEvent>) => {
+    const onPanning = (event: IEvent<MouseEvent | any>) => {
       const x = event.e.clientX - previousX;
       const y = event.e.clientY - previousY;
       previousX = event.e.clientX;
       previousY = event.e.clientY;
       canvas.relativePan({ x, y });
+      (canvas as any).isPanningMode = true;
     };
-    const onEndPanning = (event: IEvent<MouseEvent>) => {
-      canvas.off("mouse:move");
-      canvas.off("mouse:up");
+    const onEndPanning = (event: IEvent<MouseEvent | any>) => {
+      if ((canvas as any).isPanningMode) {
+        (canvas as any).isPanningMode = false;
+      } else {
+        const pointer = canvas.getPointer(event.e);
+        const pixel = getPixel({
+          width: 5,
+          top: pointer.y,
+          left: pointer.x,
+          color: "red",
+        });
+        canvas.add(pixel);
+      }
+      canvas.off("mouse:move", onPanning);
+      canvas.off("mouse:up", onEndPanning);
     };
-
-    // drawing
-    if (event.target) {
-    } else {
-      const pointer = canvas.getPointer(event.e);
-      const pixel = getPixel({
-        width: 5,
-        top: pointer.y,
-        left: pointer.x,
-        fill: ["red", "green", "blue"][Date.now() % 3],
-      });
-      canvas.add(pixel);
-    }
-
-    startPanning(event);
+    onStartPanning(event);
   };
-  console.log(Date.now());
+
+  // hover
+  const { width } = pixelSettings;
+  const hoverPixel = getPixel({ width, top: 0, left: 0, color: "red" });
+  canvas.add(hoverPixel);
+  const mouseMoveSettings = (event: IEvent<MouseEvent>) => {
+    const pointer = canvas.getPointer(event.e);
+    const width = hoverPixel.width ?? 1;
+    hoverPixel.set({
+      top: Math.floor(pointer.y / width) * width,
+      left: Math.floor(pointer.x / width) * width,
+    });
+    canvas.requestRenderAll();
+  };
+
   canvas.on("mouse:wheel", mouseWheelSettings);
   canvas.on("mouse:down", mouseDownSettings);
+  canvas.on("mouse:move", mouseMoveSettings);
 
   return [
     { type: "mouse:wheel", listener: mouseWheelSettings },
     { type: "mouse:down", listener: mouseDownSettings },
+    { type: "mouse:move", listener: mouseMoveSettings },
   ];
 };
 
@@ -192,4 +208,18 @@ export const removeCanvasSettings = (
   settings.map((setting) => {
     canvas.off(setting.type, setting.listener);
   });
+};
+
+export const getPixel = (options: IPixelOptions) => {
+  const { width, color, top, left } = options;
+  const pixel = new fabric.Rect({
+    width,
+    height: width,
+    top: Math.floor(top / width) * width,
+    left: Math.floor(left / width) * width,
+    fill: color,
+    hasControls: false,
+    selectable: false,
+  });
+  return pixel;
 };

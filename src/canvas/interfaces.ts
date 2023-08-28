@@ -2,5 +2,9 @@ export interface IPixelOptions {
   width: number;
   top: number;
   left: number;
-  fill: string;
+  color: string;
+}
+
+export interface IPixelSettings {
+  width: number;
 }
