@@ -114,7 +114,11 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
               left,
             });
             canvas.add(pixel);
-            createPixel({ pixelSpaceId, width, top, left, color });
+            createPixel({ pixelSpaceId, width, top, left, color })
+              .then((newPixel) => {})
+              .catch((error) => {
+                canvas.remove(pixel);
+              });
             canvas.fire("pixel:placed");
           }
         }
