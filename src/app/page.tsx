@@ -1,13 +1,16 @@
 "use client";
 
-import useCanvas from "@/canvas/useCanvas";
+import useCanvas from "@/hooks/useCanvas";
 import {
   addCanvasSettings,
   removeCanvasSettings,
   setCanvasViewport,
-} from "@/canvas/utils";
+} from "@/utils/canvas.util";
 import Canvas from "@/components/Canvas";
+import { PixelSettings } from "@/components/PixelSettings";
+import { getPixels } from "@/services/pixel.service";
 import { useEffect } from "react";
+import { Pixel } from "@/utils/pixel.util";
 
 export default function Home() {
   const { canvas } = useCanvas("ecombest-pixels", {
@@ -19,7 +22,14 @@ export default function Home() {
   useEffect(() => {
     if (canvas) {
       setCanvasViewport(canvas, { width: 500, height: 500 });
-      var settings = addCanvasSettings(canvas, { width: 5 });
+      var settings = addCanvasSettings(canvas);
+      getPixels({}).then((result) => {
+        result?.map((pixel: any) => {
+          const { width, top, left, color } = pixel;
+          const px = new Pixel({ width, top, left, color });
+          canvas.add(px);
+        });
+      });
     }
     return () => {
       canvas && removeCanvasSettings(canvas, settings);
@@ -30,6 +40,7 @@ export default function Home() {
     <main className="h-screen flex items-center justify-center p-0 bg-gray-500">
       <div className="w-full h-full flex items-center justify-center">
         <Canvas canvas={canvas} canvasId="ecombest-pixels" />
+        <PixelSettings canvas={canvas} />
       </div>
     </main>
   );

@@ -1,12 +1,6 @@
 "use client";
 
-import useCanvas from "@/canvas/useCanvas";
-import {
-  addCanvasSettings,
-  centerCanvasViewPort,
-  removeCanvasSettings,
-  setCanvasViewport,
-} from "@/canvas/utils";
+import { centerCanvasViewPort } from "@/utils/canvas.util";
 import { useEffect, useRef, useState } from "react";
 
 interface Props {

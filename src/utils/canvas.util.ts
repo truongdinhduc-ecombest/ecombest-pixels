@@ -1,7 +1,9 @@
-import { CANVAS_ATTRIBUTES, KEY_CODES } from "@/canvas/constants";
+import { CANVAS_ATTRIBUTES, KEY_CODES } from "@/constants/canvas.constant";
 import { IEvent } from "fabric/fabric-impl";
 import { fabric } from "fabric";
-import { IPixelOptions, IPixelSettings } from "./interfaces";
+import { IPixelOptions, IPixelSettings } from "../interfaces/pixel.interface";
+import { createPixel } from "@/services/pixel.service";
+import { Pixel } from "./pixel.util";
 
 export const setCanvasViewport = (
   canvas: fabric.Canvas,
@@ -43,77 +45,7 @@ export const centerCanvasViewPort = (canvas: fabric.Canvas) => {
   }
 };
 
-export const addCanvasKeyboardSettings = (
-  canvas: fabric.Canvas,
-  isPreview?: boolean
-) => {
-  const keydownSettings = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case KEY_CODES.delete: {
-        const activeObject = canvas.getActiveObject();
-        if (isPreview) {
-          if (activeObject && (activeObject as any).isAdditional) {
-            canvas.remove(activeObject).renderAll();
-          }
-        } else {
-          if (activeObject) {
-            canvas.remove(activeObject).renderAll();
-          }
-        }
-        return;
-      }
-
-      case KEY_CODES.shift: {
-        (canvas as any).isGroupingMode = true;
-        return;
-      }
-
-      default: {
-        return;
-      }
-    }
-  };
-
-  const keyupSettings = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case KEY_CODES.shift: {
-        (canvas as any).isGroupingMode = false;
-        return;
-      }
-
-      default: {
-        return;
-      }
-    }
-  };
-
-  window.addEventListener("keydown", keydownSettings);
-  window.addEventListener("keyup", keyupSettings);
-
-  return [
-    { type: "keydown", listener: keydownSettings },
-    { type: "keyup", listener: keyupSettings },
-  ];
-};
-
-export const removeCanvasKeyboardSettings = (
-  settings: {
-    type: string;
-    listener: (event: KeyboardEvent) => void;
-  }[]
-) => {
-  settings.map((setting) => {
-    window.removeEventListener(
-      setting.type as "keydown" | "keypress" | "keyup",
-      setting.listener
-    );
-  });
-};
-
-export const addCanvasSettings = (
-  canvas: fabric.Canvas,
-  pixelSettings: IPixelSettings
-) => {
+export const addCanvasSettings = (canvas: fabric.Canvas) => {
   const mouseWheelSettings = (event: IEvent<WheelEvent>) => {
     event.e.preventDefault();
     event.e.stopPropagation();
@@ -159,13 +91,30 @@ export const addCanvasSettings = (
         (canvas as any).isPanningMode = false;
       } else {
         const pointer = canvas.getPointer(event.e);
-        const pixel = getPixel({
-          width: 5,
-          top: pointer.y,
-          left: pointer.x,
-          color: "red",
-        });
-        canvas.add(pixel);
+        const viewportWidth = canvas?.clipPath?.width ?? 0;
+        const viewporHeight = canvas?.clipPath?.height ?? 0;
+        if (
+          event.target ||
+          pointer.x < 0 ||
+          pointer.x > viewportWidth ||
+          pointer.y < 0 ||
+          pointer.y > viewporHeight ||
+          !(canvas as any).pixelPlaceable
+        ) {
+        } else {
+          const { width, color } = (canvas as any).pixelSettings;
+          const top = Math.floor(pointer.y / width) * width;
+          const left = Math.floor(pointer.x / width) * width;
+          const pixel = new Pixel({
+            width,
+            color,
+            top,
+            left,
+          });
+          canvas.add(pixel);
+          createPixel({ width, top, left, color });
+          canvas.fire("pixel:placed");
+        }
       }
       canvas.off("mouse:move", onPanning);
       canvas.off("mouse:up", onEndPanning);
@@ -174,17 +123,17 @@ export const addCanvasSettings = (
   };
 
   // hover
-  const { width } = pixelSettings;
-  const hoverPixel = getPixel({ width, top: 0, left: 0, color: "red" });
-  canvas.add(hoverPixel);
   const mouseMoveSettings = (event: IEvent<MouseEvent>) => {
-    const pointer = canvas.getPointer(event.e);
-    const width = hoverPixel.width ?? 1;
-    hoverPixel.set({
-      top: Math.floor(pointer.y / width) * width,
-      left: Math.floor(pointer.x / width) * width,
-    });
-    canvas.requestRenderAll();
+    const hoverPixel = (canvas as any).hoverPixel;
+    if (hoverPixel) {
+      const pointer = canvas.getPointer(event.e);
+      const width = hoverPixel.width ?? 1;
+      hoverPixel.set({
+        top: Math.floor(pointer.y / width) * width,
+        left: Math.floor(pointer.x / width) * width,
+      });
+      canvas.requestRenderAll();
+    }
   };
 
   canvas.on("mouse:wheel", mouseWheelSettings);
@@ -210,16 +159,19 @@ export const removeCanvasSettings = (
   });
 };
 
-export const getPixel = (options: IPixelOptions) => {
-  const { width, color, top, left } = options;
-  const pixel = new fabric.Rect({
+export const addPixelSettings = (
+  canvas: fabric.Canvas,
+  pixelSettings: IPixelSettings
+) => {
+  (canvas as any).pixelSettings = pixelSettings;
+
+  const { width, color } = pixelSettings;
+  const hoverPixel = new Pixel({
     width,
-    height: width,
-    top: Math.floor(top / width) * width,
-    left: Math.floor(left / width) * width,
-    fill: color,
-    hasControls: false,
-    selectable: false,
+    top: -width,
+    left: -width,
+    color,
   });
-  return pixel;
+  (canvas as any).hoverPixel = hoverPixel;
+  canvas.add(hoverPixel);
 };

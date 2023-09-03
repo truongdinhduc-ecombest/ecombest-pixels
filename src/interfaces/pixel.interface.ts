@@ -7,4 +7,5 @@ export interface IPixelOptions {
 
 export interface IPixelSettings {
   width: number;
+  color: string;
 }
