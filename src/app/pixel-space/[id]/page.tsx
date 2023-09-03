@@ -11,37 +11,42 @@ import { PixelSettings } from "@/components/PixelSettings";
 import { getPixels } from "@/services/pixel.service";
 import { useEffect } from "react";
 import { Pixel } from "@/utils/pixel.util";
+import { getPixelSpace } from "@/services/pixelSpace.service";
+import { useParams, useSearchParams } from "next/navigation";
 
-export default function Home() {
+export default function PixelSpace() {
+  const { id } = useParams();
   const { canvas } = useCanvas("ecombest-pixels", {
-    width: 1000,
-    height: 1000,
     backgroundColor: "white",
   });
 
   useEffect(() => {
-    if (canvas) {
-      setCanvasViewport(canvas, { width: 500, height: 500 });
-      var settings = addCanvasSettings(canvas);
-      getPixels({}).then((result) => {
+    if (canvas && id) {
+      getPixelSpace(id as string).then((result) => {
+        const { width, height, _id } = result;
+        setCanvasViewport(canvas, { width, height });
+        (canvas as any).pixelSpaceId = _id;
+      });
+      getPixels({ pixelSpaceId: id }).then((result) => {
         result?.map((pixel: any) => {
           const { width, top, left, color } = pixel;
           const px = new Pixel({ width, top, left, color });
           canvas.add(px);
         });
       });
+      var settings = addCanvasSettings(canvas);
     }
     return () => {
       canvas && removeCanvasSettings(canvas, settings);
     };
-  }, [canvas]);
+  }, [canvas, id]);
 
   return (
-    <main className="h-screen flex items-center justify-center p-0 bg-gray-500">
+    <div className="h-screen flex items-center justify-center p-0 bg-gray-500">
       <div className="w-full h-full flex items-center justify-center">
         <Canvas canvas={canvas} canvasId="ecombest-pixels" />
         <PixelSettings canvas={canvas} />
       </div>
-    </main>
+    </div>
   );
 }

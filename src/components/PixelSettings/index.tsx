@@ -7,10 +7,10 @@ interface Props {
 
 export function PixelSettings(props: Props) {
   const { canvas } = props;
-  const [counter, setCounter] = useState(10);
+  const [counter, setCounter] = useState(0);
 
   useEffect(() => {
-    if (counter <= 0) {
+    if (counter <= 0 && canvas) {
       (canvas as any).pixelPlaceable = true;
       return;
     }

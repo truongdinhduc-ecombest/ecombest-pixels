@@ -102,18 +102,21 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
           !(canvas as any).pixelPlaceable
         ) {
         } else {
-          const { width, color } = (canvas as any).pixelSettings;
-          const top = Math.floor(pointer.y / width) * width;
-          const left = Math.floor(pointer.x / width) * width;
-          const pixel = new Pixel({
-            width,
-            color,
-            top,
-            left,
-          });
-          canvas.add(pixel);
-          createPixel({ width, top, left, color });
-          canvas.fire("pixel:placed");
+          const pixelSpaceId = (canvas as any).pixelSpaceId;
+          if (pixelSpaceId) {
+            const { width, color } = (canvas as any).pixelSettings;
+            const top = Math.floor(pointer.y / width) * width;
+            const left = Math.floor(pointer.x / width) * width;
+            const pixel = new Pixel({
+              width,
+              color,
+              top,
+              left,
+            });
+            canvas.add(pixel);
+            createPixel({ pixelSpaceId, width, top, left, color });
+            canvas.fire("pixel:placed");
+          }
         }
       }
       canvas.off("mouse:move", onPanning);
