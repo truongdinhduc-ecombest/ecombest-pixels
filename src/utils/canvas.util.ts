@@ -99,6 +99,7 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
           left > viewportWidth ||
           top < 0 ||
           top > viewporHeight ||
+          !(canvas as any)?.pixelPlaceable ||
           (canvas as any)?.pixelPositions?.[`${left}-${top}`]
         ) {
         } else {

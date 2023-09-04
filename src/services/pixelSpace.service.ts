@@ -8,3 +8,10 @@ export const getPixelSpace = (id: string) => {
     method: "get",
   });
 };
+
+export const getPixelSpaces = (filter: object) => {
+  return callService({
+    url: `${API_URLS.pixelSpace}/get-many?${stringify(filter)}`,
+    method: "get",
+  });
+};

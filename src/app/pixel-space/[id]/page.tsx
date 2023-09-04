@@ -42,7 +42,7 @@ export default function PixelSpace() {
   }, [canvas, id]);
 
   return (
-    <div className="h-screen flex items-center justify-center p-0 bg-gray-500">
+    <div className="h-screen flex items-center justify-center p-0 bg-gray-300">
       <div className="w-full h-full flex items-center justify-center">
         <Canvas canvas={canvas} canvasId="ecombest-pixels" />
         <PixelSettings
