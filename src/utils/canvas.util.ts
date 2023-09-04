@@ -94,8 +94,10 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
       } else {
         const viewportWidth = canvas?.clipPath?.width ?? 0;
         const viewporHeight = canvas?.clipPath?.height ?? 0;
-        const top = (canvas as any)?.hoverPixel?.top;
-        const left = (canvas as any)?.hoverPixel?.left;
+        const pointer = canvas.getPointer(event.e);
+        const width = (canvas as any)?.hoverPixel?.width ?? 1;
+        const top = Math.floor(pointer.y / width) * width;
+        const left = Math.floor(pointer.x / width) * width;
         if (
           left < 0 ||
           left > viewportWidth ||
@@ -109,8 +111,6 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
           if (pixelSpaceId) {
             const width = (canvas as any).hoverPixel.width;
             const color = (canvas as any).hoverPixel.fill;
-            const top = (canvas as any).hoverPixel.top;
-            const left = (canvas as any).hoverPixel.left;
             const pixel = new Pixel({
               width,
               color,
@@ -124,6 +124,7 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
               .catch((error) => {
                 canvas.remove(pixel);
                 delete (canvas as any).pixelPositions[`${left}-${top}`];
+                canvas.fire("pixel:placeable");
               });
             canvas.fire("pixel:placed");
           }
