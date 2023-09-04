@@ -10,7 +10,8 @@ export const callService = async (config: AxiosRequestConfig) => {
       },
     });
     return response?.data?.data;
-  } catch (error) {
+  } catch (error: any) {
+    alert(error?.response?.data?.message ?? "Something went wrong.");
     throw error;
   }
 };

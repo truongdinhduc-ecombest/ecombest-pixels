@@ -104,9 +104,10 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
         } else {
           const pixelSpaceId = (canvas as any).pixelSpaceId;
           if (pixelSpaceId) {
-            const { width, color } = (canvas as any).pixelSettings;
-            const top = Math.floor(pointer.y / width) * width;
-            const left = Math.floor(pointer.x / width) * width;
+            const width = (canvas as any).hoverPixel.width;
+            const color = (canvas as any).hoverPixel.fill;
+            const top = (canvas as any).hoverPixel.top;
+            const left = (canvas as any).hoverPixel.left;
             const pixel = new Pixel({
               width,
               color,
@@ -170,8 +171,6 @@ export const addPixelSettings = (
   canvas: fabric.Canvas,
   pixelSettings: IPixelSettings
 ) => {
-  (canvas as any).pixelSettings = pixelSettings;
-
   const { width, color } = pixelSettings;
   const hoverPixel = new Pixel({
     width,

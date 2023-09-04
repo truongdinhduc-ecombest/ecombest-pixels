@@ -26,17 +26,22 @@ export function PixelSettings(props: Props) {
       setWaitingTime(pixelSpace?.waitingTime ?? 0);
       (canvas as any).pixelPlaceable = false;
     };
+    const placeablePixel = () => {
+      setWaitingTime(0);
+      (canvas as any).pixelPlaceable = true;
+    };
     if (canvas && pixelSpace?.pixelSettings) {
       addPixelSettings(canvas, pixelSpace.pixelSettings);
       canvas.on("pixel:placed", placePixel);
+      canvas.on("pixel:placeable", placeablePixel);
     }
     return () => {
       canvas?.off("pixel:placed", placePixel);
+      canvas?.off("pixel:placeable", placeablePixel);
     };
   }, [canvas, pixelSpace]);
 
   const onChangeColor = (color: string) => {
-    (canvas as any).pixelSettings.color = color;
     (canvas as any).hoverPixel.set({ fill: color });
   };
 
