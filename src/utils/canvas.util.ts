@@ -73,16 +73,18 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
     let previousX = 0;
     let previousY = 0;
     const onStartPanning = (event: IEvent<MouseEvent>) => {
-      previousX = event.e.clientX;
-      previousY = event.e.clientY;
+      const { clientX, clientY } = getClientCoordinates(event.e);
+      previousX = clientX;
+      previousY = clientY;
       canvas.on("mouse:move", onPanning);
       canvas.on("mouse:up", onEndPanning);
     };
     const onPanning = (event: IEvent<MouseEvent | any>) => {
-      const x = event.e.clientX - previousX;
-      const y = event.e.clientY - previousY;
-      previousX = event.e.clientX;
-      previousY = event.e.clientY;
+      const { clientX, clientY } = getClientCoordinates(event.e);
+      const x = clientX - previousX;
+      const y = clientY - previousY;
+      previousX = clientX;
+      previousY = clientY;
       canvas.relativePan({ x, y });
       (canvas as any).isPanningMode = true;
     };
@@ -197,4 +199,30 @@ export const addPixelsToPixelSpace = (
     pixelPositions[`${left}-${top}`] = true;
   });
   (pixelSpace as any).pixelPositions = pixelPositions;
+};
+
+const getClientCoordinates = (event: any) => {
+  switch (event.type) {
+    case "mousemove": {
+      return { clientX: event?.clientX ?? 0, clientY: event?.clientY ?? 0 };
+    }
+
+    case "mousedown": {
+      return { clientX: event?.clientX ?? 0, clientY: event?.clientY ?? 0 };
+    }
+
+    case "touchstart": {
+      const { clientX, clientY } = event?.changedTouches?.[0];
+      return { clientX: clientX ?? 0, clientY: clientY ?? 0 };
+    }
+
+    case "touchmove": {
+      const { clientX, clientY } = event?.changedTouches?.[0];
+      return { clientX: clientX ?? 0, clientY: clientY ?? 0 };
+    }
+
+    default: {
+      return { clientX: 0, clientY: 0 };
+    }
+  }
 };
