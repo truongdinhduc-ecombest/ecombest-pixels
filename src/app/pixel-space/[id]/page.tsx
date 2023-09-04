@@ -3,6 +3,7 @@
 import useCanvas from "@/hooks/useCanvas";
 import {
   addCanvasSettings,
+  addPixelsToPixelSpace,
   removeCanvasSettings,
   setCanvasViewport,
 } from "@/utils/canvas.util";
@@ -10,7 +11,6 @@ import Canvas from "@/components/Canvas";
 import { PixelSettings } from "@/components/PixelSettings";
 import { getPixels } from "@/services/pixel.service";
 import { useEffect, useState } from "react";
-import { Pixel } from "@/utils/pixel.util";
 import { getPixelSpace } from "@/services/pixelSpace.service";
 import { useParams } from "next/navigation";
 
@@ -30,11 +30,7 @@ export default function PixelSpace() {
         if (_id) {
           (canvas as any).pixelSpaceId = _id;
           getPixels({ pixelSpaceId: id }).then((pixels) => {
-            pixels?.map((pixel: any) => {
-              const { width, top, left, color } = pixel;
-              const px = new Pixel({ width, top, left, color });
-              canvas.add(px);
-            });
+            addPixelsToPixelSpace(canvas, pixels);
           });
         }
       });
@@ -49,7 +45,10 @@ export default function PixelSpace() {
     <div className="h-screen flex items-center justify-center p-0 bg-gray-500">
       <div className="w-full h-full flex items-center justify-center">
         <Canvas canvas={canvas} canvasId="ecombest-pixels" />
-        <PixelSettings canvas={canvas} pixelSpace={pixelSpace} />
+        <PixelSettings
+          canvas={canvas}
+          pixelSettings={pixelSpace?.pixelSettings}
+        />
       </div>
     </div>
   );

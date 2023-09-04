@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 
 interface Props {
   canvas?: fabric.Canvas;
-  pixelSpace?: any;
+  pixelSettings?: any;
 }
 
 export function PixelSettings(props: Props) {
-  const { canvas, pixelSpace } = props;
+  const { canvas, pixelSettings } = props;
   const [waitingTime, setWaitingTime] = useState(0);
 
   useEffect(() => {
@@ -23,15 +23,15 @@ export function PixelSettings(props: Props) {
 
   useEffect(() => {
     const placePixel = () => {
-      setWaitingTime(pixelSpace?.waitingTime ?? 0);
+      setWaitingTime(pixelSettings?.waitingTime ?? 0);
       (canvas as any).pixelPlaceable = false;
     };
     const placeablePixel = () => {
       setWaitingTime(0);
       (canvas as any).pixelPlaceable = true;
     };
-    if (canvas && pixelSpace?.pixelSettings) {
-      addPixelSettings(canvas, pixelSpace.pixelSettings);
+    if (canvas && pixelSettings) {
+      addPixelSettings(canvas, pixelSettings);
       canvas.on("pixel:placed", placePixel);
       canvas.on("pixel:placeable", placeablePixel);
     }
@@ -39,7 +39,7 @@ export function PixelSettings(props: Props) {
       canvas?.off("pixel:placed", placePixel);
       canvas?.off("pixel:placeable", placeablePixel);
     };
-  }, [canvas, pixelSpace]);
+  }, [canvas, pixelSettings]);
 
   const onChangeColor = (color: string) => {
     (canvas as any).hoverPixel.set({ fill: color });
@@ -54,7 +54,7 @@ export function PixelSettings(props: Props) {
       <input
         name="pixel-color"
         className="h-10 w-10"
-        defaultValue={pixelSpace?.pixelSettings?.color}
+        defaultValue={pixelSettings?.color}
         type="color"
         onChange={(event) => {
           onChangeColor(event.target.value);

@@ -1,4 +1,4 @@
-import { CANVAS_ATTRIBUTES, KEY_CODES } from "@/constants/canvas.constant";
+import { CANVAS_ATTRIBUTES } from "@/constants/canvas.constant";
 import { IEvent } from "fabric/fabric-impl";
 import { fabric } from "fabric";
 import { IPixelOptions, IPixelSettings } from "../interfaces/pixel.interface";
@@ -90,16 +90,16 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
       if ((canvas as any).isPanningMode) {
         (canvas as any).isPanningMode = false;
       } else {
-        const pointer = canvas.getPointer(event.e);
         const viewportWidth = canvas?.clipPath?.width ?? 0;
         const viewporHeight = canvas?.clipPath?.height ?? 0;
+        const top = (canvas as any)?.hoverPixel?.top;
+        const left = (canvas as any)?.hoverPixel?.left;
         if (
-          event.target ||
-          pointer.x < 0 ||
-          pointer.x > viewportWidth ||
-          pointer.y < 0 ||
-          pointer.y > viewporHeight ||
-          !(canvas as any).pixelPlaceable
+          left < 0 ||
+          left > viewportWidth ||
+          top < 0 ||
+          top > viewporHeight ||
+          (canvas as any)?.pixelPositions?.[`${left}-${top}`]
         ) {
         } else {
           const pixelSpaceId = (canvas as any).pixelSpaceId;
@@ -115,10 +115,12 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
               left,
             });
             canvas.add(pixel);
+            (canvas as any).pixelPositions[`${left}-${top}`] = true;
             createPixel({ pixelSpaceId, width, top, left, color })
               .then((newPixel) => {})
               .catch((error) => {
                 canvas.remove(pixel);
+                delete (canvas as any).pixelPositions[`${left}-${top}`];
               });
             canvas.fire("pixel:placed");
           }
@@ -180,4 +182,18 @@ export const addPixelSettings = (
   });
   (canvas as any).hoverPixel = hoverPixel;
   canvas.add(hoverPixel);
+};
+
+export const addPixelsToPixelSpace = (
+  pixelSpace: fabric.Canvas,
+  pixels: IPixelOptions[]
+) => {
+  const pixelPositions: any = {};
+  pixels?.map((pixel: any) => {
+    const { width, top, left, color } = pixel;
+    const px = new Pixel({ width, top, left, color });
+    pixelSpace.add(px);
+    pixelPositions[`${left}-${top}`] = true;
+  });
+  (pixelSpace as any).pixelPositions = pixelPositions;
 };
