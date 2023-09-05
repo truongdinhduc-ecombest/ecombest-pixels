@@ -3,6 +3,7 @@
 import useCanvas from "@/hooks/useCanvas";
 import {
   addCanvasSettings,
+  addPixelToCanvas,
   addPixelsToPixelSpace,
   removeCanvasSettings,
   setCanvasViewport,
@@ -18,6 +19,7 @@ import {
   joinedPixelSpace,
   leavePixelSpace,
   leftPixelSpace,
+  placedPixel,
 } from "@/services/socket.service";
 
 export default function PixelSpace() {
@@ -53,6 +55,9 @@ export default function PixelSpace() {
       joinPixelSpace(pixelSpace?._id);
       joinedPixelSpace(setTotalUsers);
       leftPixelSpace(setTotalUsers);
+      placedPixel((pixel) => {
+        canvas && addPixelToCanvas(canvas, pixel);
+      });
       window.onbeforeunload = function () {
         leavePixelSpace(pixelSpace?._id);
       };

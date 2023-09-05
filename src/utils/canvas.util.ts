@@ -4,6 +4,7 @@ import { fabric } from "fabric";
 import { IPixelOptions, IPixelSettings } from "../interfaces/pixel.interface";
 import { createPixel } from "@/services/pixel.service";
 import { Pixel } from "./pixel.util";
+import { placePixel } from "@/services/socket.service";
 
 export const setCanvasViewport = (
   canvas: fabric.Canvas,
@@ -120,7 +121,9 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
             canvas.add(pixel);
             (canvas as any).pixelPositions[`${left}-${top}`] = true;
             createPixel({ pixelSpaceId, width, top, left, color })
-              .then((newPixel) => {})
+              .then((newPixel) => {
+                placePixel(newPixel);
+              })
               .catch((error) => {
                 canvas.remove(pixel);
                 delete (canvas as any).pixelPositions[`${left}-${top}`];
@@ -226,4 +229,19 @@ const getClientCoordinates = (event: any) => {
       return { clientX: 0, clientY: 0 };
     }
   }
+};
+
+export const addPixelToCanvas = (
+  canvas: fabric.Canvas,
+  newPixel: IPixelOptions
+) => {
+  const { width, color, top, left } = newPixel;
+  const pixel = new Pixel({
+    width,
+    color,
+    top,
+    left,
+  });
+  canvas.add(pixel);
+  (canvas as any).pixelPositions[`${left}-${top}`] = true;
 };
