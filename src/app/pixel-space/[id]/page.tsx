@@ -51,12 +51,12 @@ export default function PixelSpace() {
   }, [canvas, id]);
 
   useEffect(() => {
-    if (pixelSpace?._id) {
+    if (pixelSpace?._id && canvas) {
       joinPixelSpace(pixelSpace?._id);
       joinedPixelSpace(setTotalUsers);
       leftPixelSpace(setTotalUsers);
       placedPixel((pixel) => {
-        canvas && addPixelToCanvas(canvas, pixel);
+        addPixelToCanvas(canvas, pixel);
       });
       window.onbeforeunload = function () {
         leavePixelSpace(pixelSpace?._id);
@@ -65,7 +65,7 @@ export default function PixelSpace() {
     return () => {
       pixelSpace?._id && leavePixelSpace(pixelSpace?._id);
     };
-  }, [pixelSpace]);
+  }, [pixelSpace, canvas]);
 
   return (
     <div className="h-screen flex items-center justify-center p-0 bg-gray-300">
