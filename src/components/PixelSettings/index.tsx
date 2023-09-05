@@ -47,13 +47,13 @@ export function PixelSettings(props: Props) {
 
   return (
     <div
-      className={`absolute bottom-2 flex items-center space-x-2 px-4 py-2 shadow-2xl shadow-black rounded bg-white ${
+      className={`absolute bottom-4 flex items-center space-x-2 p-2 shadow-2xl shadow-black rounded bg-white ${
         waitingTime > 0 ? "opacity-50" : ""
       }`}
     >
       <input
         name="pixel-color"
-        className="h-10 w-10"
+        className="h-8 w-8"
         defaultValue={pixelSettings?.color}
         type="color"
         onChange={(event) => {
