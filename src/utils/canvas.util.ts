@@ -18,7 +18,8 @@ export const setCanvasViewport = (
     });
   } else {
     const clipPath = new fabric.Rect({
-      ...viewport,
+      width,
+      height,
     });
     canvas.clipPath = clipPath;
   }
@@ -189,20 +190,6 @@ export const addPixelSettings = (
   });
   (canvas as any).hoverPixel = hoverPixel;
   canvas.add(hoverPixel);
-};
-
-export const addPixelsToPixelSpace = (
-  pixelSpace: fabric.Canvas,
-  pixels: IPixelOptions[]
-) => {
-  const pixelPositions: any = {};
-  pixels?.map((pixel: any) => {
-    const { width, top, left, color } = pixel;
-    const px = new Pixel({ width, top, left, color });
-    pixelSpace.add(px);
-    pixelPositions[`${left}-${top}`] = true;
-  });
-  (pixelSpace as any).pixelPositions = pixelPositions;
 };
 
 const getClientCoordinates = (event: any) => {

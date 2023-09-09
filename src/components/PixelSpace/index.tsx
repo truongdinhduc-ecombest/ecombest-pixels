@@ -2,9 +2,10 @@ import { IPixelSpace } from "@/interfaces/pixelSpace.interface";
 import Canvas from "../Canvas";
 import useCanvas from "@/hooks/useCanvas";
 import { useEffect } from "react";
-import { addPixelsToPixelSpace, setCanvasViewport } from "@/utils/canvas.util";
+import { setCanvasViewport } from "@/utils/canvas.util";
 import { getPixels } from "@/services/pixel.service";
 import { useRouter } from "next/navigation";
+import { loadPixelSpace } from "@/utils/pixelSpace.util";
 
 interface Props {
   pixelSpace: IPixelSpace;
@@ -26,7 +27,7 @@ export default function PixelSpace(props: Props) {
       const { width, height } = pixelSpace;
       setCanvasViewport(canvas, { width, height });
       getPixels({ pixelSpaceId: pixelSpace?._id }).then((pixels) => {
-        addPixelsToPixelSpace(canvas, pixels);
+        loadPixelSpace(canvas, pixelSpace, pixels);
       });
     }
   }, [canvas, pixelSpace]);

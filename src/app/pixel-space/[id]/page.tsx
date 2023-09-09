@@ -4,9 +4,7 @@ import useCanvas from "@/hooks/useCanvas";
 import {
   addCanvasSettings,
   addPixelToCanvas,
-  addPixelsToPixelSpace,
   removeCanvasSettings,
-  setCanvasViewport,
 } from "@/utils/canvas.util";
 import Canvas from "@/components/Canvas";
 import { PixelSettings } from "@/components/PixelSettings";
@@ -21,6 +19,7 @@ import {
   leftPixelSpace,
   placedPixel,
 } from "@/services/socket.service";
+import { loadPixelSpace } from "@/utils/pixelSpace.util";
 
 export default function PixelSpace() {
   const { id } = useParams();
@@ -33,13 +32,11 @@ export default function PixelSpace() {
   useEffect(() => {
     if (canvas && id) {
       getPixelSpace(id as string).then((pixelSpace) => {
-        const { width, height, _id } = pixelSpace;
-        setCanvasViewport(canvas, { width, height });
         setPixelSpace(pixelSpace);
-        if (_id) {
-          (canvas as any).pixelSpaceId = _id;
-          getPixels({ pixelSpaceId: id }).then((pixels) => {
-            addPixelsToPixelSpace(canvas, pixels);
+        if (pixelSpace?._id) {
+          (canvas as any).pixelSpaceId = pixelSpace?._id;
+          getPixels({ pixelSpaceId: pixelSpace?._id }).then((pixels) => {
+            loadPixelSpace(canvas, pixelSpace, pixels);
           });
         }
       });
