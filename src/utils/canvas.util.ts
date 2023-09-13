@@ -246,4 +246,5 @@ export const addPixelToCanvas = (
   } else {
     (currentPosition as fabric.Rect)?.set?.({ fill: color });
   }
+  canvas.requestRenderAll();
 };
