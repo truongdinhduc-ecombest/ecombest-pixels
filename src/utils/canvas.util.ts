@@ -105,12 +105,14 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
           left >= viewportWidth ||
           top < 0 ||
           top >= viewporHeight ||
-          !(canvas as any)?.pixelPlaceable ||
-          (canvas as any)?.pixelPositions?.[`${left}-${top}`]
+          !(canvas as any)?.pixelPlaceable
         ) {
         } else {
           const pixelSpaceId = (canvas as any).pixelSpaceId;
           if (pixelSpaceId) {
+            const currentPosition = (canvas as any).pixelPositions[
+              `${left}-${top}`
+            ];
             const width = (canvas as any).hoverPixel.width;
             const color = (canvas as any).hoverPixel.fill;
             const pixel = new Pixel({
@@ -119,8 +121,17 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
               top,
               left,
             });
-            canvas.add(pixel);
-            (canvas as any).pixelPositions[`${left}-${top}`] = true;
+            if (
+              typeof currentPosition == "boolean" ||
+              currentPosition == undefined
+            ) {
+              const hoverPixel = (canvas as any).hoverPixel;
+              canvas.remove(hoverPixel);
+              canvas.add(pixel, hoverPixel);
+              (canvas as any).pixelPositions[`${left}-${top}`] = pixel;
+            } else {
+              (currentPosition as fabric.Rect)?.set?.({ fill: color });
+            }
             createPixel({ pixelSpaceId, width, top, left, color })
               .then((newPixel) => {
                 placePixel(newPixel);
@@ -229,6 +240,8 @@ export const addPixelToCanvas = (
     top,
     left,
   });
-  canvas.add(pixel);
-  (canvas as any).pixelPositions[`${left}-${top}`] = true;
+  const hoverPixel = (canvas as any).hoverPixel;
+  canvas.remove(hoverPixel);
+  canvas.add(pixel, hoverPixel);
+  (canvas as any).pixelPositions[`${left}-${top}`] = pixel;
 };

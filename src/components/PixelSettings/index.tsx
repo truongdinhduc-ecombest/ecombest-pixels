@@ -24,7 +24,9 @@ export function PixelSettings(props: Props) {
   useEffect(() => {
     const placePixel = () => {
       setWaitingTime(pixelSettings?.waitingTime ?? 0);
-      (canvas as any).pixelPlaceable = false;
+      if (pixelSettings?.waitingTime > 0) {
+        (canvas as any).pixelPlaceable = false;
+      }
     };
     const placeablePixel = () => {
       setWaitingTime(0);
