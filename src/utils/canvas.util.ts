@@ -121,10 +121,7 @@ export const addCanvasSettings = (canvas: fabric.Canvas) => {
               top,
               left,
             });
-            if (
-              typeof currentPosition == "boolean" ||
-              currentPosition == undefined
-            ) {
+            if (currentPosition === true || currentPosition === undefined) {
               const hoverPixel = (canvas as any).hoverPixel;
               canvas.remove(hoverPixel);
               canvas.add(pixel, hoverPixel);
