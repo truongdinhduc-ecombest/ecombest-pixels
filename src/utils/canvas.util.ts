@@ -231,14 +231,19 @@ export const addPixelToCanvas = (
   newPixel: IPixelOptions
 ) => {
   const { width, color, top, left } = newPixel;
-  const pixel = new Pixel({
-    width,
-    color,
-    top,
-    left,
-  });
-  const hoverPixel = (canvas as any).hoverPixel;
-  canvas.remove(hoverPixel);
-  canvas.add(pixel, hoverPixel);
-  (canvas as any).pixelPositions[`${left}-${top}`] = pixel;
+  const currentPosition = (canvas as any).pixelPositions[`${left}-${top}`];
+  if (currentPosition === true || currentPosition === undefined) {
+    const pixel = new Pixel({
+      width,
+      color,
+      top,
+      left,
+    });
+    const hoverPixel = (canvas as any).hoverPixel;
+    canvas.remove(hoverPixel);
+    canvas.add(pixel, hoverPixel);
+    (canvas as any).pixelPositions[`${left}-${top}`] = pixel;
+  } else {
+    (currentPosition as fabric.Rect)?.set?.({ fill: color });
+  }
 };
